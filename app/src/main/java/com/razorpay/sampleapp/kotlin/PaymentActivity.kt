@@ -11,8 +11,16 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
 import com.razorpay.*
+import com.razorpay.sampleapp.Api
+import com.razorpay.sampleapp.CreatePaymentOrderRequest
+import com.razorpay.sampleapp.KtorClient
 import com.razorpay.sampleapp.MainActivity
+import com.razorpay.sampleapp.OrderResponse
 import com.razorpay.sampleapp.R
+import com.razorpay.sampleapp.networking.Result
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import org.json.JSONObject
 import java.lang.Exception
 
@@ -40,43 +48,69 @@ class PaymentActivity: Activity(), PaymentResultWithDataListener, ExternalWallet
     }
 
     private fun startPayment() {
-        /*
-        *  You need to pass current activity in order to let Razorpay create CheckoutActivity
-        * */
-        val activity:Activity = this
+        val activity: Activity = this
         val co = Checkout()
         val etApiKey = findViewById<EditText>(R.id.et_api_key)
-        val etCustomOptions = findViewById<EditText>(R.id.et_custom_options)
-        if (!TextUtils.isEmpty(etApiKey.text.toString())){
+
+        if (!TextUtils.isEmpty(etApiKey.text.toString())) {
             co.setKeyID(etApiKey.text.toString())
         }
-        try {
-            var options = JSONObject()
-            if (!TextUtils.isEmpty(etCustomOptions.text.toString())){
-                options = JSONObject(etCustomOptions.text.toString())
-            }else{
-                options.put("name","Razorpay Corp")
-                options.put("description","Demoing Charges")
-                //You can omit the image option to fetch the image from dashboard
-                options.put("image","https://s3.amazonaws.com/rzp-mobile/images/rzp.png")
-                options.put("currency","INR")
-                options.put("amount","100")
-                options.put("send_sms_hash",true);
 
-                val prefill = JSONObject()
-                prefill.put("email","test@razorpay.com")
-                prefill.put("contact","9021066696")
+        CoroutineScope(Dispatchers.Main).launch {
+            try {
+                // 🔸 Build the request
+                val request = CreatePaymentOrderRequest(
+                    amount = 50000, // ₹500 in paise
+                    currency = "INR",
+                    notes = mapOf("user_id" to "1234") // Customize as needed
+                )
 
+                val api = Api(KtorClient.instance)
 
-                options.put("prefill",prefill)
+                // ✅ Make the API call
+                val result = api.paymentOrder(request)
+
+                when (result) {
+                    is Result.Success<*> -> {
+                        val order = result.data as OrderResponse
+
+                        // 🔸 Prepare Razorpay options
+                        val options = JSONObject().apply {
+                            put("name", "Razorpay Corp")
+                            put("description", "Payment for booking")
+                            put("order_id", order.orderId) // Razorpay Order ID
+                            put("currency", "INR")
+                            put("amount", 100) // Must be string
+                            put("image", "https://s3.amazonaws.com/rzp-mobile/images/rzp.png")
+                            put("send_sms_hash", true)
+
+                            val prefill = JSONObject().apply {
+                                put("email", "test@example.com")
+                                put("contact", "9999999999")
+                            }
+                            put("prefill", prefill)
+                        }
+
+                        // 🔸 Start Razorpay Checkout
+                        co.open(activity, options)
+                    }
+
+                    is Result.Error<*> -> {
+                        Toast.makeText(
+                            activity,
+                            "Failed to create order: ${result.error}",
+                            Toast.LENGTH_LONG
+                        ).show()
+                        Log.e(TAG, "API Error: ${result.error}")
+                    }
+                }
+            } catch (e: Exception) {
+                Toast.makeText(activity, "Unexpected error: ${e.message}", Toast.LENGTH_LONG).show()
+                Log.e(TAG, "Exception in payment", e)
             }
-
-            co.open(activity,options)
-        }catch (e: Exception){
-            Toast.makeText(activity,"Error in payment: "+ e.message,Toast.LENGTH_LONG).show()
-            e.printStackTrace()
         }
     }
+
 
     override fun onPaymentSuccess(p0: String?, p1: PaymentData?) {
         try{
