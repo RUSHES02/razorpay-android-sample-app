@@ -1,0 +1,13 @@
+package com.razorpay.sampleapp.networking
+
+enum class ErrorType {
+	NO_INTERNET,
+	SERIALIZATION,
+	UNKNOWN,
+	BAD_REQUEST,
+	UNAUTHORIZED,
+	FORBIDDEN,
+	NOT_FOUND,
+	UNPROCESSABLE_ENTITY,
+	SERVER_ERROR
+}

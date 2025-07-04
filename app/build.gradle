@@ -77,14 +77,14 @@ dependencies {
     implementation 'androidx.multidex:multidex:2.0.1'
 
     // Ktor Client Core
-    implementation "io.ktor:ktor-client-core:3.2.0" // Use the latest Ktor version
+    implementation "io.ktor:ktor-client-core:2.3.12" // Use the latest Ktor version
     // Ktor Client Engine (OkHttp is a good choice for Android)
-    implementation "io.ktor:ktor-client-okhttp:3.2.0"
+    implementation "io.ktor:ktor-client-okhttp:2.3.12"
     // Ktor Content Negotiation (for JSON serialization/deserialization)
-    implementation "io.ktor:ktor-client-content-negotiation:3.2.0"
-    implementation "io.ktor:ktor-serialization-kotlinx-json:3.2.0" // For Kotlinx.serialization
+    implementation "io.ktor:ktor-client-content-negotiation:2.3.12"
+    implementation "io.ktor:ktor-serialization-kotlinx-json:2.3.12" // For Kotlinx.serialization
     // Ktor Logging (optional, but helpful for debugging)
-    implementation "io.ktor:ktor-client-logging:3.2.0"
+    implementation "io.ktor:ktor-client-logging:2.3.12"
 
 
     // Kotlinx.serialization runtime (if not already present)
