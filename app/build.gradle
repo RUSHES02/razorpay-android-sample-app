@@ -1,7 +1,9 @@
-apply plugin: 'com.android.application'
-//apply plugin: 'kotlin-android-extensions'
-apply plugin: 'kotlin-android'
-
+plugins {
+    id 'com.android.application'
+    id 'org.jetbrains.kotlin.android'
+    id 'kotlin-parcelize' // If you're using it
+    id 'org.jetbrains.kotlin.plugin.serialization' version '2.2.0' // Or your Kotlin version
+}
 
 repositories {
     maven {
@@ -30,6 +32,11 @@ android {
         minSdkVersion 22
         targetSdkVersion 36
         multiDexEnabled true
+
+        android.buildFeatures.buildConfig = true
+        def properties = new Properties()
+        properties.load(project.rootProject.file("local.properties").newDataInputStream())
+        buildConfigField("String", "BASE_URL", "\"${properties.getProperty("BASE_URL")}\"")
     }
 
     buildFeatures { // <--- ADD THIS BLOCK
@@ -68,4 +75,22 @@ dependencies {
     implementation 'com.google.android.material:material:1.12.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.2.1'
     implementation 'androidx.multidex:multidex:2.0.1'
+
+    // Ktor Client Core
+    implementation "io.ktor:ktor-client-core:3.2.0" // Use the latest Ktor version
+    // Ktor Client Engine (OkHttp is a good choice for Android)
+    implementation "io.ktor:ktor-client-okhttp:3.2.0"
+    // Ktor Content Negotiation (for JSON serialization/deserialization)
+    implementation "io.ktor:ktor-client-content-negotiation:3.2.0"
+    implementation "io.ktor:ktor-serialization-kotlinx-json:3.2.0" // For Kotlinx.serialization
+    // Ktor Logging (optional, but helpful for debugging)
+    implementation "io.ktor:ktor-client-logging:3.2.0"
+
+
+    // Kotlinx.serialization runtime (if not already present)
+    implementation 'org.jetbrains.kotlinx:kotlinx-serialization-json:1.9.0' // Use latest
+
+    // Coroutines (you likely already have these from the Retrofit example)
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2'
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.10.2'
 }
