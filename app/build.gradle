@@ -37,6 +37,7 @@ android {
         def properties = new Properties()
         properties.load(project.rootProject.file("local.properties").newDataInputStream())
         buildConfigField("String", "BASE_URL", "\"${properties.getProperty("BASE_URL")}\"")
+        buildConfigField("String", "RAZORPAY_API_KEY", "\"${properties.getProperty("RAZORPAY_API_KEY")}\"")
     }
 
     buildFeatures { // <--- ADD THIS BLOCK
@@ -75,6 +76,7 @@ dependencies {
     implementation 'com.google.android.material:material:1.12.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.2.1'
     implementation 'androidx.multidex:multidex:2.0.1'
+    implementation 'com.razorpay:checkout:1.6.20'
 
     // Ktor Client Core
     implementation "io.ktor:ktor-client-core:2.3.12" // Use the latest Ktor version

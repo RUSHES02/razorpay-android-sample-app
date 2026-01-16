@@ -11,10 +11,10 @@ import io.ktor.client.request.setBody
 class Api(
     private val httpClient: HttpClient,
 ) {
-    suspend fun paymentOrder(request: CreatePaymentOrderRequest): Result<OrderResponse, NetworkError> {
-        return safeCall<OrderResponse> {
+    suspend fun paymentOrder(request: CreatePaymentOrderRequest): Result<CreatePaymentResponse, NetworkError> {
+        return safeCall<CreatePaymentResponse> {
             httpClient.post(
-                urlString = constructUrl("/payment")
+                urlString = constructUrl("payment/create")
             ) {
                 setBody(request)
             }

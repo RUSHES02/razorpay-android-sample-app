@@ -5,7 +5,11 @@ import android.util.Log
 import io.ktor.client.*
 import io.ktor.client.engine.okhttp.*
 import io.ktor.client.plugins.contentnegotiation.*
+import io.ktor.client.plugins.defaultRequest
 import io.ktor.client.plugins.logging.*
+import io.ktor.client.request.header
+import io.ktor.http.ContentType
+import io.ktor.http.contentType
 import io.ktor.serialization.kotlinx.json.*
 import kotlinx.serialization.json.Json
 
@@ -18,11 +22,14 @@ object KtorClient {
         HttpClient(OkHttp) { // Using OkHttp engine
             // Configure JSON serialization
             install(ContentNegotiation) {
-                json(Json {
-                    prettyPrint = true
-                    isLenient = true
-                    ignoreUnknownKeys = true // Helpful if server sends extra fields
-                })
+                json(
+                    json = Json {
+                        ignoreUnknownKeys = true
+                        prettyPrint = true
+                        isLenient = true
+                        encodeDefaults = true
+                    }
+                )
             }
 
             // Configure Logging (optional)
@@ -36,9 +43,9 @@ object KtorClient {
             }
 
             // Default request configuration (e.g., base URL parts, headers)
-            // install(DefaultRequest) {
-            //    header(HttpHeaders.ContentType, ContentType.Application.Json)
-            // }
+            defaultRequest {
+                contentType(ContentType.Application.Json)
+            }
         }
     }
 }

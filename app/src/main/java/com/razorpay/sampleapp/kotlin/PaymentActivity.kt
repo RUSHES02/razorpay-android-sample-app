@@ -4,17 +4,19 @@ import android.app.Activity
 import android.app.AlertDialog
 import android.content.DialogInterface
 import android.os.Bundle
-import android.os.PersistableBundle
-import android.text.TextUtils
 import android.util.Log
 import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
-import com.razorpay.*
+import com.razorpay.Checkout
+import com.razorpay.ExternalWalletListener
+import com.razorpay.PaymentData
+import com.razorpay.PaymentResultWithDataListener
 import com.razorpay.sampleapp.Api
+import com.razorpay.sampleapp.BuildConfig
 import com.razorpay.sampleapp.CreatePaymentOrderRequest
+import com.razorpay.sampleapp.CreatePaymentResponse
 import com.razorpay.sampleapp.KtorClient
-import com.razorpay.sampleapp.MainActivity
 import com.razorpay.sampleapp.OrderResponse
 import com.razorpay.sampleapp.R
 import com.razorpay.sampleapp.networking.Result
@@ -22,7 +24,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.json.JSONObject
-import java.lang.Exception
 
 class PaymentActivity: Activity(), PaymentResultWithDataListener, ExternalWalletListener, DialogInterface.OnClickListener {
 
@@ -52,9 +53,9 @@ class PaymentActivity: Activity(), PaymentResultWithDataListener, ExternalWallet
         val co = Checkout()
         val etApiKey = findViewById<EditText>(R.id.et_api_key)
 
-        if (!TextUtils.isEmpty(etApiKey.text.toString())) {
-            co.setKeyID(etApiKey.text.toString())
-        }
+
+        co.setKeyID(BuildConfig.RAZORPAY_API_KEY)
+
 
         CoroutineScope(Dispatchers.Main).launch {
             try {
@@ -62,7 +63,6 @@ class PaymentActivity: Activity(), PaymentResultWithDataListener, ExternalWallet
                 val request = CreatePaymentOrderRequest(
                     amount = 50000, // ₹500 in paise
                     currency = "INR",
-                    notes = mapOf("user_id" to "1234") // Customize as needed
                 )
 
                 val api = Api(KtorClient.instance)
@@ -72,16 +72,15 @@ class PaymentActivity: Activity(), PaymentResultWithDataListener, ExternalWallet
 
                 when (result) {
                     is Result.Success<*> -> {
-                        val order = result.data as OrderResponse
+                        val order = result.data as CreatePaymentResponse
 
                         // 🔸 Prepare Razorpay options
                         val options = JSONObject().apply {
                             put("name", "Razorpay Corp")
                             put("description", "Payment for booking")
-                            put("order_id", order.orderId) // Razorpay Order ID
+                            put("order_id", order.paymentOrderId) // Razorpay Order ID
                             put("currency", "INR")
-                            put("amount", 100) // Must be string
-                            put("image", "https://s3.amazonaws.com/rzp-mobile/images/rzp.png")
+                            put("amount", request.amount) // Must be string
                             put("send_sms_hash", true)
 
                             val prefill = JSONObject().apply {
